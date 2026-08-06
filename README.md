@@ -1,2 +1,2 @@
 # fugaku
-working directories for calculations in fugaku
+working directory for calculations in fugaku
