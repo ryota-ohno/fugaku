@@ -61,6 +61,7 @@ def get_one_exe(file_name):
         '\n',
         'TMPDIR=$PJM_LOCALTMP/$PJM_JOBID\n',
         'mkdir $TMPDIR\n',
+        'export GAUSS_SCRDIR=$TMPDIR\n',
         '\n',
         'g16 < {}.inp > {}.log \n'.format(file_basename,file_basename),
         '\n',
