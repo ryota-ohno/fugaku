@@ -60,6 +60,7 @@ def get_one_exe(file_name):
         '. $g16root/g16/bsd/g16.profile \n',
         '\n',
         'TMPDIR=$PJM_LOCALTMP/$PJM_JOBID\n',
+        'mkdir $TMPDIR\n',
         '\n',
         'g16 < {}.inp > {}.log \n'.format(file_basename,file_basename),
         '\n',
