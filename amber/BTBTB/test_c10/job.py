@@ -31,7 +31,7 @@ def init_process(args):
         '\n',
         'source /home/u15256/venv/bin/activate\n',
         '\n',
-        f'python /vol0303/data/hp260444/Working/fugaku/amber/BTBTB/src/step1_8_xyz_new_0.py --auto-dir {args.auto_dir}/{dir_name} --monomer-name {monomer_name} --num-nodes 2\n',
+        f'python /vol0303/data/hp260444/Working/fugaku/amber/BTBTB/src/step1_8_xyz_new_0.py --auto-dir {args.auto_dir}/{dir_name} --monomer-name {monomer_name} --num-nodes 20\n',
         '\n',
         '#sleep 12 \n'
             ]
