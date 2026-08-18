@@ -178,7 +178,7 @@ def get_file_name_from_dict(monomer_name,params_dict,structure_type):
         file_name += '_{}_{}'.format(key,val)
     return file_name + f'_{structure_type}.mol2'
     
-def exec_gjf(auto_dir, monomer_name, params_dict,structure_type,isTest):
+def exec_gjf(auto_dir, monomer_name, params_dict,structure_type):
     xyz_dir = os.path.join(auto_dir,'gaussview')
     xyzfile_name = make_xyz(monomer_name, params_dict,structure_type)
     xyz_path = os.path.join(xyz_dir,xyzfile_name)
@@ -188,9 +188,8 @@ def exec_gjf(auto_dir, monomer_name, params_dict,structure_type,isTest):
     
     file_name = make_gjf_xyz(auto_dir, monomer_name, params_dict,structure_type)
     file_job,log_file_name = get_one_exe(auto_dir,file_name,monomer_name)
-    if isTest:
-        subprocess.run(['chmod','+x',file_job])
-        subprocess.run([file_job])
+    subprocess.run(['chmod','+x',file_job])
+    subprocess.run([file_job])
     return log_file_name
     
 ############################################################################################

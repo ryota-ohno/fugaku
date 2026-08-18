@@ -43,10 +43,10 @@ def main_process(args):
     isOver = False
     while not(isOver):
         #check
-        isOver = listen(auto_dir,args.monomer_name,df_mono,args.num_nodes,args.isTest)##argsの中身を取る
+        isOver = listen(auto_dir,args.monomer_name,df_mono,args.num_nodes)##argsの中身を取る
         time.sleep(5)
 
-def listen(auto_dir,monomer_name,df_mono,num_nodes,isTest):##args自体を引数に取るか中身をばらして取るかの違い
+def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取るか中身をばらして取るかの違い
 
     fixed_param_keys = ['theta','A2','phi','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
 
@@ -121,6 +121,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes,isTest):##args自体を引数
     df_E.to_csv(auto_csv,index=False)
 #####実質的にはここで一回切るくらいのイメージ
     dict_matrix = get_params_dict(auto_dir,num_nodes)##更新分を流す a1/HOME/HASEGAWALABz2まで取得
+    new=0
     if len(dict_matrix)!=0:#終わりがまだ見えないなら
         df_E= pd.read_csv(os.path.join(auto_dir,'step1.csv'))
         df_E_1 = pd.read_csv(auto_csv_1);df_E_2 = pd.read_csv(auto_csv_2);df_E_3 = pd.read_csv(auto_csv_3)
@@ -131,26 +132,28 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes,isTest):##args自体を引数
             params_dict3 = params_dict
             alreadyCalculated = check_calc_status(auto_dir,params_dict)
             if not(alreadyCalculated):
+                new+=1
                 df_E_filtered = filter_df(df_E, params_dict)
                 if len(df_E_filtered) == 0:
                     df_newline = pd.Series({**params_dict,'E':0.,'E1':0.,'E2':0.,'E3':0.,'status':'InProgress'})
-                    df_E_new=pd.concat([df_E,df_newline.to_frame().T],axis=0,ignore_index=True)
+                    df_E=pd.concat([df_E,df_newline.to_frame().T],axis=0,ignore_index=True)
 
                 ## 1の実行　##
-                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, structure_type=1,isTest=isTest)
+                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, structure_type=1)
                 df_newline_1 = pd.Series({**params_dict1,'E1':0.,'status':'InProgress','file_name':file_name})
                 df_E_1=pd.concat([df_E_1,df_newline_1.to_frame().T],axis=0,ignore_index=True)
                     
                 ## 2の実行　##
-                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict2}, structure_type=2,isTest=isTest)
+                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict2}, structure_type=2)
                 df_newline_2 = pd.Series({**params_dict2,'E2':0.,'status':'InProgress','file_name':file_name})
                 df_E_2=pd.concat([df_E_2,df_newline_2.to_frame().T],axis=0,ignore_index=True)
                                     
                 ## 3の実行　##
-                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict3}, structure_type=3,isTest=isTest)
+                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict3}, structure_type=3)
                 df_newline_3 = pd.Series({**params_dict3,'E3':0.,'status':'InProgress','file_name':file_name})
                 df_E_3=pd.concat([df_E_3,df_newline_3.to_frame().T],axis=0,ignore_index=True)
-        df_E_new.to_csv(auto_csv,index=False);df_E_1.to_csv(auto_csv_1,index=False);df_E_2.to_csv(auto_csv_2,index=False);df_E_3.to_csv(auto_csv_3,index=False)
+    if new>0:
+        df_E.to_csv(auto_csv,index=False);df_E_1.to_csv(auto_csv_1,index=False);df_E_2.to_csv(auto_csv_2,index=False);df_E_3.to_csv(auto_csv_3,index=False)
 
     init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
