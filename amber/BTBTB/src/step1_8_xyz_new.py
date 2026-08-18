@@ -2,7 +2,7 @@
 import os ##ok
 import numpy as np ##ok
 import time ##ok
-from make_8_xyz import exec_gjf##計算した点のxyzfileを出す
+from make_8_xyz_new import exec_gjf##計算した点のxyzfileを出す
 from utils import get_E
 import argparse ##ok 
 import shutil ##ok
@@ -20,36 +20,35 @@ def main_process(args):
     
     auto_csv_path = os.path.join(auto_dir,'step1.csv')
     if not os.path.exists(auto_csv_path):
-        df=pd.DataFrame(columns=['theta','A2','a','b','z','E','E1','E2','E3','status'])
+        df=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E','E1','E2','E3','status'])
         df.to_csv(auto_csv_path,index=False)
         
     auto_csv_path1 = os.path.join(auto_dir,'step1_1.csv')
     if not os.path.exists(auto_csv_path1):
-        df1=pd.DataFrame(columns=['theta','A2','a','z','E1','status','file_name'])
+        df1=pd.DataFrame(columns=['theta','A2','phi','a','z','E1','status','file_name'])
         df1.to_csv(auto_csv_path1,index=False)
         
     auto_csv_path2 = os.path.join(auto_dir,'step1_2.csv')
     if not os.path.exists(auto_csv_path2):
-        df2=pd.DataFrame(columns=['theta','A2','b','z','E2','status','file_name'])
+        df2=pd.DataFrame(columns=['theta','A2','phi','b','z','E2','status','file_name'])
         df2.to_csv(auto_csv_path2,index=False)
         
     auto_csv_path3 = os.path.join(auto_dir,'step1_3.csv')
     if not os.path.exists(auto_csv_path3):
-        df3=pd.DataFrame(columns=['theta','A2','a','b','z','E3','status','file_name'])
+        df3=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E3','status','file_name'])
         df3.to_csv(auto_csv_path3,index=False)                
 
-    mono_file=f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}_mono.out'
-    E_mono=get_E(mono_file)[0]
-
+    df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}_mono.csv')
     os.chdir(os.path.join(auto_dir,'amber'))
     isOver = False
     while not(isOver):
         #check
-        isOver = listen(auto_dir,args.monomer_name,E_mono,args.num_nodes)##argsの中身を取る
+        isOver = listen(auto_dir,args.monomer_name,df_mono,args.num_nodes)##argsの中身を取る
         time.sleep(5)
 
-def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取るか中身をばらして取るかの違い
-    fixed_param_keys = ['theta','A2','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
+def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取るか中身をばらして取るかの違い
+
+    fixed_param_keys = ['theta','A2','phi','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
 
     auto_csv_1 = os.path.join(auto_dir,'step1_1.csv');df_E_1 = pd.read_csv(auto_csv_1)
     df_prg_1 = df_E_1.loc[df_E_1['status']=='InProgress',fixed_param_keys+opt_param_keys_1+['file_name']]
@@ -57,13 +56,15 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict1_ = row[fixed_param_keys + opt_param_keys_1 + ['file_name']].to_dict()
         file_name1=params_dict1_['file_name']
         log_filepath1 = os.path.join(*[auto_dir,'gaussian',file_name1])
+        phi1=params_dict1_['phi']
+        E_mono1 = df_mono.loc[df_mono['phi'] == phi1, 'E'].iloc[0]
         if not(os.path.exists(log_filepath1)):
             continue
         E_list1=get_E(log_filepath1)
         if len(E_list1)!=1 :##get Eの長さは計算した分子の数
             continue
         else:
-            E1 = round(float(E_list1[0]) - 2 * E_mono, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
+            E1 = round(float(E_list1[0]) - 2 * E_mono1, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
             df_E_1.loc[idx, ['E1','status']] = [E1,'Done']
     df_E_1.to_csv(auto_csv_1,index=False)
     
@@ -73,13 +74,15 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict2_ = row[fixed_param_keys + opt_param_keys_2 + ['file_name']].to_dict()
         file_name2=params_dict2_['file_name']
         log_filepath2 = os.path.join(*[auto_dir,'gaussian',file_name2])
+        phi2=params_dict2_['phi']
+        E_mono2 = df_mono.loc[df_mono['phi'] == phi2, 'E'].iloc[0]
         if not(os.path.exists(log_filepath2)):
             continue
         E_list2=get_E(log_filepath2)
         if len(E_list2)!=1 :##get Eの長さは計算した分子の数
             continue
         else:
-            E2 = round(float(E_list2[0]) - 2 * E_mono, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
+            E2 = round(float(E_list2[0]) - 2 * E_mono2, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
             df_E_2.loc[idx, ['E2','status']] = [E2,'Done']
     df_E_2.to_csv(auto_csv_2,index=False)
     
@@ -89,13 +92,15 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict3_ = row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2 + ['file_name']].to_dict()
         file_name3=params_dict3_['file_name']
         log_filepath3 = os.path.join(*[auto_dir,'gaussian',file_name3])
+        phi3=params_dict3_['phi']
+        E_mono3 = df_mono.loc[df_mono['phi'] == phi3, 'E'].iloc[0]
         if not(os.path.exists(log_filepath3)):
             continue
         E_list3=get_E(log_filepath3)
         if len(E_list3)!=1 :##get Eの長さは計算した分子の数
             continue
         else:
-            E3 = round(float(E_list3[0]) - 2 * E_mono, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
+            E3 = round(float(E_list3[0]) - 2 * E_mono3, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
             df_E_3.loc[idx, ['E3','status']] = [E3,'Done']
     df_E_3.to_csv(auto_csv_3,index=False)
 
@@ -166,7 +171,7 @@ def check_calc_status(auto_dir,params_dict):
         return False
 
 def get_params_dict(auto_dir, num_nodes):
-    fixed_param_keys = ['theta','A2','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
+    fixed_param_keys = ['theta','A2','phi','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
     init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
     df_cur = pd.read_csv(os.path.join(auto_dir, 'step1.csv'))

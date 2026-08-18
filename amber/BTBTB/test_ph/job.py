@@ -1,0 +1,55 @@
+##tetracene層内計算
+import os
+os.environ['HOME'] ='/vol0303/data/hp260444'
+import pandas as pd
+import argparse
+import subprocess
+import numpy as np
+
+def init_process(args):
+    auto_dir = f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/{args.auto_dir}'
+    monomer_name=args.monomer_name
+    df_init=pd.read_csv(os.path.join(auto_dir,'step1_init_params.csv'))
+    theta_list=[10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 80.0]
+    for theta in theta_list:
+        dir_name = f'{theta}'
+        os.makedirs(os.path.join(auto_dir,f'{dir_name}'), exist_ok=True)
+        df_init_=df_init[df_init['theta'] == theta]
+        df_init_.to_csv(os.path.join(auto_dir,f'{dir_name}/step1_init_params.csv'),index=False)
+        os.chdir(os.path.join(auto_dir,f'{dir_name}'))
+        job_lines=[
+        '#!/bin/bash \n',
+        '#PJM -L "rscgrp=small"\n',
+        '#PJM -L "node=1"\n',
+        '#PJM -L "elapse=10:00:00"\n',
+        '#PJM -L "freq=2200,eco_state=2"\n',
+        '#PJM -g hp260444\n',
+        '#PJM -x PJM_LLIO_GFSCACHE=/vol0004:/vol0003\n',
+        '#PJM --llio localtmp-size=20Gi\n',
+        '#PJM -S\n',
+        '#PJM "--norestart"\n',
+        '\n',
+        f'python /vol0303/data/hp260444/Working/fugaku/amber/BTBTB/src/step1_8_xyz_new_0.py --auto-dir {args.auto_dir}/{dir_name} --monomer-name {monomer_name} --num-nodes 2\n',
+        '\n',
+        '#sleep 12 \n'
+            ]
+        with open(os.path.join(auto_dir,f'{dir_name}/job.sh'),'w')as f:
+            f.writelines(job_lines)
+        subprocess.run(['pjsub',os.path.join(auto_dir,f'{dir_name}/job.sh')])
+
+def update_value_in_df(df,index,key,value):
+    df.loc[index,key]=value
+    return df
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('--isTest',action='store_true')
+    parser.add_argument('--auto-dir',type=str,help='path to dir which includes gaussian, gaussview and csv')
+    parser.add_argument('--monomer-name',type=str,help='name of monomer to be calculated')
+    ##maxnum-machine2 がない
+    args = parser.parse_args()
+
+    print("----main process----")
+    init_process(args)
+    print("----finish process----")    

@@ -15,38 +15,39 @@ def get_monomer_xyzR(monomer_name,Ta,Tb,Tc,A2,A3,phi):
     xyz_array = np.matmul(xyz_array,Rod(ez,A3).T)#
     xyz_array = xyz_array + T_vec
     
-    C0_index = 5;C1_index = 35;C2_index = 13;C3_index = 22####
-    C0=xyz_array[C0_index];C1=xyz_array[C1_index];C2=xyz_array[C2_index];C3=xyz_array[C3_index]
-    n1=C1-C0;n1/=np.linalg.norm(n1)
-    n2=C3-C2;n2/=np.linalg.norm(n2)
-
-    xyz_array[C1_index:C3_index] = np.matmul((xyz_array[C1_index:C3_index]-C0),Rod(n2,phi).T) + C0
-    xyz_array[C3_index:] = np.matmul((xyz_array[C3_index:]-C2),Rod(n1,-phi).T) + C2
+    C0_index = 19;C1_index = 29####
+    C0=xyz_array[C0_index];C1=xyz_array[C1_index];n1=C1-C0;n1/=np.linalg.norm(n1)
+    
+    xyz_array[C1_index:] = np.matmul((xyz_array[C1_index:]-C0),Rod(n1,phi).T) + C0
     return np.concatenate([xyz_array,atom_array],axis=1)
         
-line1='@<TRIPOS>MOLECULE\nBTBTB_dimer \n   60  68       2     0     0\nSMALL\nrbcc\n\n\n@<TRIPOS>ATOM\n'
-line2='@<TRIPOS>BOND\n'
-bond_lines=[[1, 1, 2, 'ar'], [2, 1, 3, 'ar'], [3, 1, 7, '1'], [4, 2, 4, 'ar'], [5, 2, 9, '1'], [6, 3, 5, 'ar'], [7, 3, 27, '1'], 
-            [8, 4, 6, 'ar'], [9, 4, 30, '1'], [10, 5, 6, 'ar'], [11, 5, 28, '1'], [12, 6, 29, '1'], [13, 7, 8, '1'], [14, 8, 9, 'ar'], 
-            [15, 8, 10, 'ar'], [16, 9, 12, 'ar'], [17, 10, 11, 'ar'], [18, 10, 24, '1'], [19, 11, 13, 'ar'], [20, 11, 14, '1'], [21, 12, 13, 'ar'], 
-            [22, 12, 25, '1'], [23, 13, 16, '1'], [24, 14, 15, 'ar'], [25, 14, 17, 'ar'], [26, 15, 16, '1'], [27, 15, 19, 'ar'], [28, 17, 18, 'ar'],
-            [29, 17, 26, '1'], [30, 18, 20, 'ar'], [31, 18, 21, '1'], [32, 19, 20, 'ar'], [33, 19, 23, '1'], [34, 20, 22, '1']]
-line3='@<TRIPOS>SUBSTRUCTURE\n     1 RES1        1 GROUP             0 ****  ****    0  \n     2 RES2       31 GROUP             0 ****  ****    0 \n\n'
+def get_xyzR_lines(monomer_name,xyzr_array):
+    df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{monomer_name}.csv')
+    mol=len(df_mono)
 
-para_list=[]
-with open(r'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/BTBTB.mol2')as f:
-    for line in f:
-        #print(line)
-        s=line.split()
-        if len(s)==9:
-            para_list.append([s[5],float(s[8])])
-        if (line.find('BOND')>-1):
-            break
+    bond_lines=[]
+    with open(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{monomer_name}_bond.txt')as f:
+        for line in f:
+            num, a1, a2, btype = line.strip().split()              # ['1','1','2','ar']
+            bond_lines.append([int(num), int(a1), int(a2), btype])
+    bond=len(bond_lines)
 
-def get_xyzR_lines(xyzr_array):
+    line1=f'@<TRIPOS>MOLECULE\nBTBTB_dimer \n   {int(2*mol)}  {int(2*bond)}       2     0     0\nSMALL\nrbcc\n\n\n@<TRIPOS>ATOM\n'
+    line2='@<TRIPOS>BOND\n'
+    line3=f'@<TRIPOS>SUBSTRUCTURE\n     1 RES1        1 GROUP             0 ****  ****    0  \n     2 RES2       {int(mol+1)} GROUP             0 ****  ****    0 \n\n'
+
+    para_list=[]
+    with open(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{monomer_name}.mol2')as f:
+        for line in f:
+            #print(line)
+            s=line.split()
+            if len(s)==9:
+                para_list.append([s[5],float(s[8])])
+            if (line.find('BOND')>-1):
+                break
+
     lines=[]
     lines.append(line1)
-    mol=int(len(xyzr_array)/2)
     for i in range(mol):
         x,y,z,atom=xyzr_array[i]
         atom_type,charge=para_list[i]
@@ -66,7 +67,7 @@ def get_xyzR_lines(xyzr_array):
     return lines
 
 # 実行ファイル作成
-def get_one_exe(auto_dir,file_name):
+def get_one_exe(auto_dir,file_name,monomer_name):
     file_basename = os.path.splitext(file_name)[0]
     lines_job=[
 '#!/bin/bash\n','\n',
@@ -81,7 +82,7 @@ f'rm {file_basename}.prmtop\n',
     
     lines_tleap=['source /vol0004/apps/isv/Amber20/Amber2021_20251202/dat/leap/cmd/leaprc.gaff\n',
 f'MOL = loadmol2 {file_basename}.mol2\n',
-f'loadamberparams BTBTB.frcmod\n',
+f'loadamberparams {monomer_name}.frcmod\n',
 f'saveamberparm MOL {file_basename}.prmtop {file_basename}.inpcrd\n',
 'quit\n']
     file_job = os.path.join(auto_dir,f'amber/job_{file_basename}.sh')
@@ -149,8 +150,8 @@ def make_gjf_xyz(auto_dir,monomer_name,params_dict,structure_type):
     dimer_array_p1 = np.concatenate([monomer_array_i,monomer_array_p1]);dimer_array_p2 = np.concatenate([monomer_array_i,monomer_array_p2])
     dimer_array_t1 = np.concatenate([monomer_array_i,monomer_array_t1]);dimer_array_t2 = np.concatenate([monomer_array_i,monomer_array_t2])
     
-    line_list_dimer_p1 = get_xyzR_lines(dimer_array_p1);line_list_dimer_p2 = get_xyzR_lines(dimer_array_p2)
-    line_list_dimer_t1 = get_xyzR_lines(dimer_array_t1);line_list_dimer_t2 = get_xyzR_lines(dimer_array_t2)
+    line_list_dimer_p1 = get_xyzR_lines(monomer_name,dimer_array_p1);line_list_dimer_p2 = get_xyzR_lines(monomer_name,dimer_array_p2)
+    line_list_dimer_t1 = get_xyzR_lines(monomer_name,dimer_array_t1);line_list_dimer_t2 = get_xyzR_lines(monomer_name,dimer_array_t2)
     
     if structure_type == 1:##隣接8分子について対称性より3分子でエネルギー計算
         gij_xyz_lines = line_list_dimer_p1 
@@ -186,7 +187,7 @@ def exec_gjf(auto_dir, monomer_name, params_dict,structure_type,isTest=True):
         f.writelines(xyz_list)
     
     file_name = make_gjf_xyz(auto_dir, monomer_name, params_dict,structure_type)
-    file_job,log_file_name = get_one_exe(auto_dir,file_name)
+    file_job,log_file_name = get_one_exe(auto_dir,file_name,monomer_name)
     if not(isTest):
         subprocess.run(['chmod','+x',file_job])
         subprocess.run([file_job])
