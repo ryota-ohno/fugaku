@@ -7,7 +7,7 @@ import subprocess
 import numpy as np
 
 def main_process(args):
-    auto_dir = f'/vol0303/data/hp260444/Working/nagoya_super_computer/amber_sc_opt/ditBu_BTBT/{args.auto_dir}'
+    auto_dir = f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/{args.auto_dir}'
     df_init=pd.read_csv(os.path.join(auto_dir,'step1_init_params.csv'))
     while True:
         theta_list=[10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 80.0]
@@ -25,7 +25,7 @@ def main_process(args):
 
 def result_process(args):
     subprocess.run(['rm','*.sh.*'])
-    auto_dir = f'/vol0303/data/hp260444/Working/nagoya_super_computer/amber_sc_opt/ditBu_BTBT/{args.auto_dir}'
+    auto_dir = f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/{args.auto_dir}'
     df_init=pd.read_csv(os.path.join(auto_dir,'step1_init_params.csv'))
     df_tot=[]
     theta_list=[10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 80.0]
