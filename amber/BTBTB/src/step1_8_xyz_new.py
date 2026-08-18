@@ -152,14 +152,14 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
                 df_E_3=pd.concat([df_E_3,df_newline_3.to_frame().T],axis=0,ignore_index=True)
         df_E_new.to_csv(auto_csv,index=False);df_E_1.to_csv(auto_csv_1,index=False);df_E_2.to_csv(auto_csv_2,index=False);df_E_3.to_csv(auto_csv_3,index=False)
 
-    init_params_csv=os.path.join(auto_dir, 'step2_twist_init_params.csv')
+    init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
     df_init_params_done = filter_df(df_init_params,{'status':'Done'})
     isOver = True if len(df_init_params_done)==len(df_init_params) else False
     return isOver
 
 def check_calc_status(auto_dir,params_dict):
-    df_E= pd.read_csv(os.path.join(auto_dir,'step2_twist.csv'))
+    df_E= pd.read_csv(os.path.join(auto_dir,'step1.csv'))
     if len(df_E)==0:
         return False
     df_E_filtered = filter_df(df_E, params_dict)
