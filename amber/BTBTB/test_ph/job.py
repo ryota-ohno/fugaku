@@ -21,7 +21,7 @@ def init_process(args):
         '#!/bin/bash \n',
         '#PJM -L "rscgrp=small"\n',
         '#PJM -L "node=1"\n',
-        '#PJM -L "elapse=10:00:00"\n',
+        '#PJM -L "elapse=0:10:00"\n',
         '#PJM -L "freq=2200,eco_state=2"\n',
         '#PJM -g hp260444\n',
         '#PJM -x PJM_LLIO_GFSCACHE=/vol0004:/vol0003\n',
@@ -31,7 +31,7 @@ def init_process(args):
         '\n',
         'source /vol0303/data/hp260444/venv/bin/activate\n',
         '\n',
-        f'python /vol0303/data/hp260444/Working/fugaku/amber/BTBTB/src/step1_8_xyz_new_0.py --auto-dir {args.auto_dir}/{dir_name} --monomer-name {monomer_name} --num-nodes 2\n',
+        f'python /vol0303/data/hp260444/Working/fugaku/amber/BTBTB/src/step1_8_xyz_new_0.py --auto-dir {args.auto_dir}/{dir_name} --monomer-name {monomer_name} --num-nodes 10\n',
         '\n',
         '#sleep 12 \n'
             ]
