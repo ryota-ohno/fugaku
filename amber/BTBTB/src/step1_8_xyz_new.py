@@ -178,19 +178,20 @@ def get_params_dict(auto_dir, num_nodes):
     df_init_params = pd.read_csv(init_params_csv)
     df_cur = pd.read_csv(os.path.join(auto_dir, 'step1.csv'))
     df_init_params_inprogress = df_init_params[df_init_params['status']=='InProgress']
-
-    #最初の立ち上がり時
-    dict_matrix_init=[]
-    if len(df_init_params_inprogress) < num_nodes:
-        df_init_params_notyet = df_init_params[df_init_params['status']=='NotYet']
-        for index in df_init_params_notyet.index:
-            df_init_params = update_value_in_df(df_init_params,index,'status','InProgress')
-            df_init_params.to_csv(init_params_csv,index=False)
-            params_dict = df_init_params.loc[index,fixed_param_keys+opt_param_keys_1+opt_param_keys_2].to_dict()
-            dict_matrix_init.append(params_dict)
-            if len(df_init_params_inprogress) + len(dict_matrix_init) >= num_nodes:
-                return dict_matrix_init
-        return dict_matrix_init
+    df_init_params_notyet = df_init_params[df_init_params['status']=='NotYet']
+    
+    if len(df_init_params_notyet)>0.1:#最初の立ち上がり時
+        dict_matrix_init=[]
+        if len(df_init_params_inprogress) < num_nodes:
+            df_init_params_notyet = df_init_params[df_init_params['status']=='NotYet']
+            for index in df_init_params_notyet.index:
+                df_init_params = update_value_in_df(df_init_params,index,'status','InProgress')
+                df_init_params.to_csv(init_params_csv,index=False)
+                params_dict = df_init_params.loc[index,fixed_param_keys+opt_param_keys_1+opt_param_keys_2].to_dict()
+                dict_matrix_init.append(params_dict)
+                if len(df_init_params_inprogress) + len(dict_matrix_init) >= num_nodes:
+                    return dict_matrix_init
+            return dict_matrix_init
     
     dict_matrix=[]
     for index in df_init_params_inprogress.index:##こちら側はinit_params内のある業に関する探索が終わった際の新しい行での探索を開始するもの ###ここを改良すればよさそう
