@@ -50,7 +50,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print("----main process----")
-    main_process(args)
+    #main_process(args)
     result_process(args)
     print("----finish process----")
     
