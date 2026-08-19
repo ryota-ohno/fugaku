@@ -55,7 +55,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
     for idx, row in df_prg_1.iterrows():
         params_dict1_ = row[fixed_param_keys + opt_param_keys_1 + ['file_name']].to_dict()
         file_name1=params_dict1_['file_name']
-        log_filepath1 = os.path.join(*[auto_dir,'gaussian',file_name1])
+        log_filepath1 = os.path.join(*[auto_dir,'amber',file_name1])
         phi1=params_dict1_['phi']
         E_mono1 = df_mono.loc[df_mono['phi'] == phi1, 'E'].iloc[0]
         if not(os.path.exists(log_filepath1)):
@@ -73,7 +73,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
     for idx, row in df_prg_2.iterrows():
         params_dict2_ = row[fixed_param_keys + opt_param_keys_2 + ['file_name']].to_dict()
         file_name2=params_dict2_['file_name']
-        log_filepath2 = os.path.join(*[auto_dir,'gaussian',file_name2])
+        log_filepath2 = os.path.join(*[auto_dir,'amber',file_name2])
         phi2=params_dict2_['phi']
         E_mono2 = df_mono.loc[df_mono['phi'] == phi2, 'E'].iloc[0]
         if not(os.path.exists(log_filepath2)):
@@ -91,7 +91,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
     for idx, row in df_prg_3.iterrows():
         params_dict3_ = row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2 + ['file_name']].to_dict()
         file_name3=params_dict3_['file_name']
-        log_filepath3 = os.path.join(*[auto_dir,'gaussian',file_name3])
+        log_filepath3 = os.path.join(*[auto_dir,'amber',file_name3])
         phi3=params_dict3_['phi']
         E_mono3 = df_mono.loc[df_mono['phi'] == phi3, 'E'].iloc[0]
         if not(os.path.exists(log_filepath3)):
@@ -130,25 +130,25 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
             params_dict1 = {k: v for k, v in params_dict.items() if (k in fixed_param_keys) or (k in opt_param_keys_1)}
             params_dict2 = {k: v for k, v in params_dict.items() if (k in fixed_param_keys) or (k in opt_param_keys_2)}
             params_dict3 = params_dict
-            alreadyCalculated = check_calc_status(auto_dir,params_dict)
+            alreadyCalculated = check_calc_status(df_E,params_dict)
             if not(alreadyCalculated):
                 new+=1
                 df_E_filtered = filter_df(df_E, params_dict)
                 if len(df_E_filtered) == 0:
                     df_newline = pd.Series({**params_dict,'E':0.,'E1':0.,'E2':0.,'E3':0.,'status':'InProgress'})
                     df_E=pd.concat([df_E,df_newline.to_frame().T],axis=0,ignore_index=True)
-
-                ## 1の実行　##
+            alreadyCalculated1 = check_calc_status(df_E_1,params_dict1)
+            if not(alreadyCalculated1):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, structure_type=1)
                 df_newline_1 = pd.Series({**params_dict1,'E1':0.,'status':'InProgress','file_name':file_name})
                 df_E_1=pd.concat([df_E_1,df_newline_1.to_frame().T],axis=0,ignore_index=True)
-                    
-                ## 2の実行　##
+            alreadyCalculated2 = check_calc_status(df_E_2,params_dict2)
+            if not(alreadyCalculated2):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict2}, structure_type=2)
                 df_newline_2 = pd.Series({**params_dict2,'E2':0.,'status':'InProgress','file_name':file_name})
                 df_E_2=pd.concat([df_E_2,df_newline_2.to_frame().T],axis=0,ignore_index=True)
-                                    
-                ## 3の実行　##
+            alreadyCalculated3 = check_calc_status(df_E_3,params_dict3)
+            if not(alreadyCalculated3):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict3}, structure_type=3)
                 df_newline_3 = pd.Series({**params_dict3,'E3':0.,'status':'InProgress','file_name':file_name})
                 df_E_3=pd.concat([df_E_3,df_newline_3.to_frame().T],axis=0,ignore_index=True)
@@ -161,8 +161,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
     isOver = True if len(df_init_params_done)==len(df_init_params) else False
     return isOver
 
-def check_calc_status(auto_dir,params_dict):
-    df_E= pd.read_csv(os.path.join(auto_dir,'step1.csv'))
+def check_calc_status(df_E,params_dict):
     if len(df_E)==0:
         return False
     df_E_filtered = filter_df(df_E, params_dict)
@@ -191,6 +190,7 @@ def get_params_dict(auto_dir, num_nodes):
             dict_matrix_init.append(params_dict)
             if len(df_init_params_inprogress) + len(dict_matrix_init) >= num_nodes:
                 return dict_matrix_init
+        return dict_matrix_init
     
     dict_matrix=[]
     for index in df_init_params_inprogress.index:##こちら側はinit_params内のある業に関する探索が終わった際の新しい行での探索を開始するもの ###ここを改良すればよさそう
