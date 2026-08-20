@@ -38,6 +38,11 @@ def main_process(args):
         df3=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E3','status','file_name'])
         df3.to_csv(auto_csv_path3,index=False)                
 
+    auto_csv_path4 = os.path.join(auto_dir,'step1_4.csv')
+    if not os.path.exists(auto_csv_path4):
+        df4=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E3','status','file_name'])
+        df4.to_csv(auto_csv_path3,index=False)                
+            
     df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}_mono.csv')
     os.chdir(os.path.join(auto_dir,'amber'))
     isOver = False
@@ -104,6 +109,24 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
             df_E_3.loc[idx, ['E3','status']] = [E3,'Done']
     df_E_3.to_csv(auto_csv_3,index=False)
 
+    auto_csv_4 = os.path.join(auto_dir,'step1_4.csv');df_E_4 = pd.read_csv(auto_csv_4)
+    df_prg_4 = df_E_4.loc[df_E_4['status']=='InProgress',fixed_param_keys+opt_param_keys_1+opt_param_keys_2+['file_name']]
+    for idx, row in df_prg_4.iterrows():
+        params_dict4_ = row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2 + ['file_name']].to_dict()
+        file_name4=params_dict4_['file_name']
+        log_filepath4 = os.path.join(*[auto_dir,'amber',file_name4])
+        phi4=params_dict4_['phi']
+        E_mono4 = df_mono.loc[df_mono['phi'] == phi4, 'E'].iloc[0]
+        if not(os.path.exists(log_filepath4)):
+            continue
+        E_list4=get_E(log_filepath4)
+        if len(E_list4)!=1 :##get Eの長さは計算した分子の数
+            continue
+        else:
+            E4 = round(float(E_list4[0]) - 2 * E_mono4, 4)##8分子に向けてep1,ep2作成　ep1:b ep2:a
+            df_E_4.loc[idx, ['E4','status']] = [E4,'Done']
+    df_E_4.to_csv(auto_csv_4,index=False)
+        
     auto_csv = os.path.join(auto_dir,'step1.csv')
     df_E = pd.read_csv(auto_csv)
     df_prg = df_E.loc[df_E['status']=='InProgress',fixed_param_keys+opt_param_keys_1+opt_param_keys_2]
@@ -112,24 +135,25 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
         params_dict1_ = {**row[fixed_param_keys + opt_param_keys_1].to_dict(), 'status': 'Done'}
         params_dict2_ = {**row[fixed_param_keys + opt_param_keys_2].to_dict(), 'status': 'Done'}
         params_dict3_ = {**row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2].to_dict(), 'status': 'Done'}
-        s1=filter_df(df_E_1, params_dict1_)['E1'];s2=filter_df(df_E_2, params_dict2_)['E2'];s3=filter_df(df_E_3, params_dict3_)['E3']
-        if (len(s1) == 0) or (len(s2) == 0) or (len(s3) == 0):
+        params_dict4_ = {**row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2].to_dict(), 'status': 'Done'}
+        s1=filter_df(df_E_1, params_dict1_)['E1'];s2=filter_df(df_E_2, params_dict2_)['E2'];s3=filter_df(df_E_3, params_dict3_)['E3'];s4=filter_df(df_E_4, params_dict4_)['E4']
+        if (len(s1) == 0) or (len(s2) == 0) or (len(s3) == 0) or (len(s4) == 0):
             continue
-        E1 = float(s1.values[0]);E2 = float(s2.values[0]);E3 = float(s3.values[0])
-        E=(E1+E2+E3*2)
-        df_E.loc[idx, ['E','E1','E2','E3','status']] = [E,E1,E2,E3,'Done']
+        E1 = float(s1.values[0]);E2 = float(s2.values[0]);E3 = float(s3.values[0]);E4 = float(s4.values[0])
+        E=(E1+E2+E3+E4)
+        df_E.loc[idx, ['E','E1','E2','E3','E4','status']] = [E,E1,E2,E3,E4,'Done']
     df_E.to_csv(auto_csv,index=False)
 #####実質的にはここで一回切るくらいのイメージ
     dict_matrix = get_params_dict(auto_dir,num_nodes)##更新分を流す a1/HOME/HASEGAWALABz2まで取得
     new=0
     if len(dict_matrix)!=0:#終わりがまだ見えないなら
         df_E= pd.read_csv(os.path.join(auto_dir,'step1.csv'))
-        df_E_1 = pd.read_csv(auto_csv_1);df_E_2 = pd.read_csv(auto_csv_2);df_E_3 = pd.read_csv(auto_csv_3)
+        df_E_1 = pd.read_csv(auto_csv_1);df_E_2 = pd.read_csv(auto_csv_2);df_E_3 = pd.read_csv(auto_csv_3);df_E_4 = pd.read_csv(auto_csv_4)
         for i in range(len(dict_matrix)):
             params_dict=dict_matrix[i]
             params_dict1 = {k: v for k, v in params_dict.items() if (k in fixed_param_keys) or (k in opt_param_keys_1)}
             params_dict2 = {k: v for k, v in params_dict.items() if (k in fixed_param_keys) or (k in opt_param_keys_2)}
-            params_dict3 = params_dict
+            params_dict3 = params_dict;params_dict4 = params_dict
             alreadyCalculated = check_calc_status(df_E,params_dict)
             if not(alreadyCalculated):
                 new+=1
@@ -152,8 +176,14 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict3}, structure_type=3)
                 df_newline_3 = pd.Series({**params_dict3,'E3':0.,'status':'InProgress','file_name':file_name})
                 df_E_3=pd.concat([df_E_3,df_newline_3.to_frame().T],axis=0,ignore_index=True)
+            alreadyCalculated4 = check_calc_status(df_E_4,params_dict4)
+            if not(alreadyCalculated4):    
+                file_name = exec_gjf(auto_dir, monomer_name, {**params_dict4}, structure_type=4)
+                df_newline_4 = pd.Series({**params_dict4,'E4':0.,'status':'InProgress','file_name':file_name})
+                df_E_4=pd.concat([df_E_4,df_newline_4.to_frame().T],axis=0,ignore_index=True)
+                        
     if new>0:
-        df_E.to_csv(auto_csv,index=False);df_E_1.to_csv(auto_csv_1,index=False);df_E_2.to_csv(auto_csv_2,index=False);df_E_3.to_csv(auto_csv_3,index=False)
+        df_E.to_csv(auto_csv,index=False);df_E_1.to_csv(auto_csv_1,index=False);df_E_2.to_csv(auto_csv_2,index=False);df_E_3.to_csv(auto_csv_3,index=False);df_E_4.to_csv(auto_csv_4,index=False)
 
     init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
@@ -221,8 +251,8 @@ def get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict):
     while True:
         E_list=[];heri_list=[]
         para_list=[]
-        for a in [a_init_prev]:
-            for b in [b_init_prev]:
+        for a in [a_init_prev-0.1,a_init_prev,a_init_prev+0.1]:
+            for b in [b_init_prev-0.1,b_init_prev,b_init_prev+0.1]:
                 a = np.round(a,1);b = np.round(b,1)
                 df_val_ab = df_val[
                     (df_val['a']==a)&(df_val['b']==b)&(df_val['theta']==theta)&

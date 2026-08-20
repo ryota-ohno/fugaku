@@ -116,7 +116,7 @@ def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取�
         if (len(s1) == 0) or (len(s2) == 0) or (len(s3) == 0):
             continue
         E1 = float(s1.values[0]);E2 = float(s2.values[0]);E3 = float(s3.values[0])
-        E=2*(E1+E2+E3*2)
+        E=(E1+E2+E3*2)
         df_E.loc[idx, ['E','E1','E2','E3','status']] = [E,E1,E2,E3,'Done']
     df_E.to_csv(auto_csv,index=False)
 #####実質的にはここで一回切るくらいのイメージ
