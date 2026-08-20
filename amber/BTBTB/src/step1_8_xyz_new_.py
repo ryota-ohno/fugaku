@@ -49,7 +49,7 @@ def main_process(args):
     while not(isOver):
         #check
         isOver = listen(auto_dir,args.monomer_name,df_mono,args.num_nodes)##argsの中身を取る
-        time.sleep(5)
+        time.sleep(1)
 
 def listen(auto_dir,monomer_name,df_mono,num_nodes):##args自体を引数に取るか中身をばらして取るかの違い
 
