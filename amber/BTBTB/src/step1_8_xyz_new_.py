@@ -41,7 +41,7 @@ def main_process(args):
     auto_csv_path4 = os.path.join(auto_dir,'step1_4.csv')
     if not os.path.exists(auto_csv_path4):
         df4=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E3','status','file_name'])
-        df4.to_csv(auto_csv_path3,index=False)                
+        df4.to_csv(auto_csv_path4,index=False)                
             
     df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}_mono.csv')
     os.chdir(os.path.join(auto_dir,'amber'))
