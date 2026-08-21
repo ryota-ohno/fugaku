@@ -20,22 +20,22 @@ def main_process(args):
     
     auto_csv_path = os.path.join(auto_dir,'step1.csv')
     if not os.path.exists(auto_csv_path):
-        df=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E','E1','E2','E3','status'])
+        df=pd.DataFrame(columns=['theta','A2','a','b','z','E','E1','E2','E3','status'])
         df.to_csv(auto_csv_path,index=False)
         
     auto_csv_path1 = os.path.join(auto_dir,'step1_1.csv')
     if not os.path.exists(auto_csv_path1):
-        df1=pd.DataFrame(columns=['theta','A2','phi','a','z','E1','status','file_name'])
+        df1=pd.DataFrame(columns=['theta','A2','a','z','E1','status','file_name'])
         df1.to_csv(auto_csv_path1,index=False)
         
     auto_csv_path2 = os.path.join(auto_dir,'step1_2.csv')
     if not os.path.exists(auto_csv_path2):
-        df2=pd.DataFrame(columns=['theta','A2','phi','b','z','E2','status','file_name'])
+        df2=pd.DataFrame(columns=['theta','A2','b','z','E2','status','file_name'])
         df2.to_csv(auto_csv_path2,index=False)
         
     auto_csv_path3 = os.path.join(auto_dir,'step1_3.csv')
     if not os.path.exists(auto_csv_path3):
-        df3=pd.DataFrame(columns=['theta','A2','phi','a','b','z','E3','status','file_name'])
+        df3=pd.DataFrame(columns=['theta','A2','a','b','z','E3','status','file_name'])
         df3.to_csv(auto_csv_path3,index=False)                
 
     mono_file=f'/vol0303/data/hp260444/Working/fugaku/amber/BXBX/monomer/{args.monomer_name}_mono.out'
@@ -49,7 +49,7 @@ def main_process(args):
 
 def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取るか中身をばらして取るかの違い
 
-    fixed_param_keys = ['theta','A2','phi','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
+    fixed_param_keys = ['theta','A2','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
 
     auto_csv_1 = os.path.join(auto_dir,'step1_1.csv');df_E_1 = pd.read_csv(auto_csv_1)
     df_prg_1 = df_E_1.loc[df_E_1['status']=='InProgress',fixed_param_keys+opt_param_keys_1+['file_name']]
@@ -57,7 +57,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict1_ = row[fixed_param_keys + opt_param_keys_1 + ['file_name']].to_dict()
         file_name1=params_dict1_['file_name']
         log_filepath1 = os.path.join(*[auto_dir,'amber',file_name1])
-        phi1=params_dict1_['phi']
+        
         if not(os.path.exists(log_filepath1)):
             continue
         E_list1=get_E(log_filepath1)
@@ -74,7 +74,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict2_ = row[fixed_param_keys + opt_param_keys_2 + ['file_name']].to_dict()
         file_name2=params_dict2_['file_name']
         log_filepath2 = os.path.join(*[auto_dir,'amber',file_name2])
-        phi2=params_dict2_['phi']
+        
         if not(os.path.exists(log_filepath2)):
             continue
         E_list2=get_E(log_filepath2)
@@ -91,7 +91,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         params_dict3_ = row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2 + ['file_name']].to_dict()
         file_name3=params_dict3_['file_name']
         log_filepath3 = os.path.join(*[auto_dir,'amber',file_name3])
-        phi3=params_dict3_['phi']
+        
         if not(os.path.exists(log_filepath3)):
             continue
         E_list3=get_E(log_filepath3)
@@ -171,7 +171,7 @@ def check_calc_status(df_E,params_dict):
         return False
 
 def get_params_dict(auto_dir, num_nodes):
-    fixed_param_keys = ['theta','A2','phi','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
+    fixed_param_keys = ['theta','A2','z'];opt_param_keys_1 = ['a'];opt_param_keys_2 = ['b']
     init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
     df_cur = pd.read_csv(os.path.join(auto_dir, 'step1.csv'))
@@ -215,7 +215,7 @@ def get_params_dict(auto_dir, num_nodes):
 def get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict):
     df_val = filter_df(df_cur, fixed_params_dict)
     a_init_prev = init_params_dict['a']; b_init_prev = init_params_dict['b']; theta = init_params_dict['theta']
-    z = init_params_dict['z']; A2 = init_params_dict['A2']; phi = init_params_dict['phi']
+    z = init_params_dict['z']; A2 = init_params_dict['A2']
     while True:
         E_list=[];heri_list=[]
         para_list=[]
@@ -224,7 +224,7 @@ def get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict):
                 a = np.round(a,1);b = np.round(b,1)
                 df_val_ab = df_val[
                     (df_val['a']==a)&(df_val['b']==b)&(df_val['theta']==theta)&
-                    (df_val['z']==z)&(df_val['A2']==A2)&(df_val['phi']==phi)&
+                    (df_val['z']==z)&(df_val['A2']==A2)&
                     (df_val['status']=='Done')]
                 if len(df_val_ab)==0:
                     para_list.append([a,b])

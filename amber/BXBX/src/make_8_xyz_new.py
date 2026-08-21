@@ -4,7 +4,7 @@ from utils import Rod
 import numpy as np ##ok
 import pandas as pd ##ok
 
-def get_monomer_xyzR(monomer_name,Ta,Tb,Tc,A2,A3,phi):  
+def get_monomer_xyzR(monomer_name,Ta,Tb,Tc,A2,A3):  
     T_vec = np.array([Ta,Tb,Tc])
     df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BXBX/monomer/{monomer_name}.csv')
     atoms_array_xyzR=df_mono[['atom','X','Y','Z']].values
@@ -14,11 +14,6 @@ def get_monomer_xyzR(monomer_name,Ta,Tb,Tc,A2,A3,phi):
     xyz_array = np.matmul(xyz_array,Rod(-ex,A2).T)#
     xyz_array = np.matmul(xyz_array,Rod(ez,A3).T)#
     xyz_array = xyz_array + T_vec
-    
-    C0_index = 19;C1_index = 29####
-    C0=xyz_array[C0_index];C1=xyz_array[C1_index];n1=C1-C0;n1/=np.linalg.norm(n1)
-    
-    xyz_array[C1_index:] = np.matmul((xyz_array[C1_index:]-C0),Rod(n1,phi).T) + C0
     return np.concatenate([xyz_array,atom_array],axis=1)
         
 def get_xyzR_lines(monomer_name,xyzr_array):
@@ -101,14 +96,13 @@ f'saveamberparm MOL {file_basename}.prmtop {file_basename}.inpcrd\n',
 def make_xyzfile(monomer_name,params_dict,structure_type):
     a = float(params_dict.get('a',0.0));b = float(params_dict.get('b',0.0)); z = float(params_dict.get('z',0.0))
     A2 = float(params_dict.get('A2',0.0)); A3 = float(params_dict.get('theta',0.0))
-    phi = float(params_dict.get('phi',0.0))
-
-    monomer_array_i = get_monomer_xyzR(monomer_name,0,0,0,A2,A3,phi)
     
-    monomer_array_p1 = get_monomer_xyzR(monomer_name,a,0,0,A2,A3,phi)##1,2がb方向
-    monomer_array_p2 = get_monomer_xyzR(monomer_name,0,b,2*z,A2,A3,phi)##1,2がb方向
-    monomer_array_t1 = get_monomer_xyzR(monomer_name,a/2,b/2,z,A2,-A3,-phi)##1,2がb方向
-    monomer_array_t2 = get_monomer_xyzR(monomer_name,-a/2,-b/2,-z,A2,-A3,-phi)##1,2がb方向
+    monomer_array_i = get_monomer_xyzR(monomer_name,0,0,0,A2,A3)
+    
+    monomer_array_p1 = get_monomer_xyzR(monomer_name,a,0,0,A2,A3)##1,2がb方向
+    monomer_array_p2 = get_monomer_xyzR(monomer_name,0,b,2*z,A2,A3)##1,2がb方向
+    monomer_array_t1 = get_monomer_xyzR(monomer_name,a/2,b/2,z,A2,-A3)##1,2がb方向
+    monomer_array_t2 = get_monomer_xyzR(monomer_name,-a/2,-b/2,-z,A2,-A3)##1,2がb方向
     
     xyz_list=['400 \n','polyacene9 \n']##4分子のxyzファイルを作成
     
@@ -138,14 +132,13 @@ def make_xyz(monomer_name,params_dict,structure_type):
 def make_gjf_xyz(auto_dir,monomer_name,params_dict,structure_type):
     a = float(params_dict.get('a',0.0));b = float(params_dict.get('b',0.0)); z = float(params_dict.get('z',0.0))
     A2 = float(params_dict.get('A2',0.0)); A3 = float(params_dict.get('theta',0.0))
-    phi = float(params_dict.get('phi',0.0))
-
-    monomer_array_i = get_monomer_xyzR(monomer_name,0,0,0,A2,A3,phi)
     
-    monomer_array_p1 = get_monomer_xyzR(monomer_name,a,0,0,A2,A3,phi)##1,2がb方向
-    monomer_array_p2 = get_monomer_xyzR(monomer_name,0,b,2*z,A2,A3,phi)##1,2がb方向
-    monomer_array_t1 = get_monomer_xyzR(monomer_name,a/2,b/2,z,A2,-A3,-phi)##1,2がb方向
-    monomer_array_t2 = get_monomer_xyzR(monomer_name,-a/2,-b/2,-z,A2,-A3,-phi)##1,2がb方向
+    monomer_array_i = get_monomer_xyzR(monomer_name,0,0,0,A2,A3)
+    
+    monomer_array_p1 = get_monomer_xyzR(monomer_name,a,0,0,A2,A3)##1,2がb方向
+    monomer_array_p2 = get_monomer_xyzR(monomer_name,0,b,2*z,A2,A3)##1,2がb方向
+    monomer_array_t1 = get_monomer_xyzR(monomer_name,a/2,b/2,z,A2,-A3)##1,2がb方向
+    monomer_array_t2 = get_monomer_xyzR(monomer_name,-a/2,-b/2,-z,A2,-A3)##1,2がb方向
     
     dimer_array_p1 = np.concatenate([monomer_array_i,monomer_array_p1]);dimer_array_p2 = np.concatenate([monomer_array_i,monomer_array_p2])
     dimer_array_t1 = np.concatenate([monomer_array_i,monomer_array_t1]);dimer_array_t2 = np.concatenate([monomer_array_i,monomer_array_t2])
