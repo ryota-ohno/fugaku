@@ -21,7 +21,7 @@ def init_process(args):
         '#!/bin/bash \n',
         '#PJM -L "rscgrp=small"\n',
         '#PJM -L "node=1"\n',
-        '#PJM -L "elapse=1:00:00"\n',
+        '#PJM -L "elapse=1:20:00"\n',
         '#PJM -L "freq=2200,eco_state=2"\n',
         '#PJM -g hp260444\n',
         '#PJM -x PJM_LLIO_GFSCACHE=/vol0004:/vol0003\n',
