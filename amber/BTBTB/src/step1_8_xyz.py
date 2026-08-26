@@ -132,17 +132,17 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
                 if len(df_E_filtered) == 0:
                     df_newline = pd.Series({**params_dict,'E':0.,'E1':0.,'E2':0.,'E3':0.,'status':'InProgress'})
                     df_E=pd.concat([df_E,df_newline.to_frame().T],axis=0,ignore_index=True)
-            alreadyCalculated1 = check_calc_status(df_E_1,params_dict1)
+            alreadyCalculated1 = check_calc_status_sub(df_E_1,params_dict1)
             if not(alreadyCalculated1):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, structure_type=1)
                 df_newline_1 = pd.Series({**params_dict1,'E1':0.,'status':'InProgress','file_name':file_name})
                 df_E_1=pd.concat([df_E_1,df_newline_1.to_frame().T],axis=0,ignore_index=True)
-            alreadyCalculated2 = check_calc_status(df_E_2,params_dict2)
+            alreadyCalculated2 = check_calc_status_sub(df_E_2,params_dict2)
             if not(alreadyCalculated2):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict2}, structure_type=2)
                 df_newline_2 = pd.Series({**params_dict2,'E2':0.,'status':'InProgress','file_name':file_name})
                 df_E_2=pd.concat([df_E_2,df_newline_2.to_frame().T],axis=0,ignore_index=True)
-            alreadyCalculated3 = check_calc_status(df_E_3,params_dict3)
+            alreadyCalculated3 = check_calc_status_sub(df_E_3,params_dict3)
             if not(alreadyCalculated3):    
                 file_name = exec_gjf(auto_dir, monomer_name, {**params_dict3}, structure_type=3)
                 df_newline_3 = pd.Series({**params_dict3,'E3':0.,'status':'InProgress','file_name':file_name})
@@ -165,6 +165,15 @@ def check_calc_status(df_E,params_dict):
         status = get_values_from_df(df_E_filtered,0,'status')
         return status=='Done'
     except KeyError:
+        return False
+
+def check_calc_status_sub(df_E,params_dict):
+    if len(df_E)==0:
+        return False
+    df_E_filtered = filter_df(df_E, params_dict)
+    if len(df_E_filtered)>0:
+        return True
+    else:
         return False
 
 def get_params_dict(auto_dir, num_nodes):
