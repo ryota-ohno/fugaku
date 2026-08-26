@@ -38,7 +38,7 @@ def main_process(args):
         df3=pd.DataFrame(columns=['theta','A2','a','b','z','E3','status','file_name'])
         df3.to_csv(auto_csv_path3,index=False)                
 
-    file_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}.out')
+    file_mono=f'/vol0303/data/hp260444/Working/fugaku/amber/BTBTB/monomer/{args.monomer_name}.out'
     E_mono=get_E(file_mono)
     os.chdir(os.path.join(auto_dir,'amber'))
     isOver = False
