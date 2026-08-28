@@ -177,7 +177,7 @@ def get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict):
         for cx in [cx_init_prev]:
             for cy in [cy_init_prev-0.1,cy_init_prev,cy_init_prev+0.1]:
                 for cz in [cz_init_prev-0.1,cz_init_prev,cz_init_prev+0.1]:
-                    cx = np.round(cx,1);cy = np.round(cz,1);cz = np.round(cz,1)
+                    cx = np.round(cx,1);cy = np.round(cy,1);cz = np.round(cz,1)
                     df_val_ab = df_val[
                         (df_val['cz']==cz)&(df_val['cy']==cy)&(df_val['cz']==cz)&
                         (df_val['a']==a)&(df_val['b']==b)&(df_val['theta']==theta)&
