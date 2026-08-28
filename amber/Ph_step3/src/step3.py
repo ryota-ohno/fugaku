@@ -29,7 +29,6 @@ def main_process(args):
             df_=pd.DataFrame(columns=['cx','cy','cz','theta','a','b','z','A2','phi',f'E{i}','status','file_name'])
             df_.to_csv(path,index=False)
             
-    df_mono=pd.read_csv(f'/vol0303/data/hp260444/Working/fugaku/amber/Ph_step3/monomer/{args.monomer_name}_mono.csv')
     file_mono=f'/vol0303/data/hp260444/Working/fugaku/amber/Ph_step3/monomer/{args.monomer_name}.out'
     E_mono=get_E(file_mono)[0]
     os.chdir(os.path.join(auto_dir,'amber'))
