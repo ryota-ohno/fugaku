@@ -81,8 +81,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
     new=0
     if len(dict_matrix)!=0:#終わりがまだ見えないなら
         df_E= pd.read_csv(os.path.join(auto_dir,'step1.csv'))
-        for i in range(len(dict_matrix)):
-            params_dict=dict_matrix[i]
+        for params_dict in dict_matrix:
             alreadyCalculated = check_calc_status(df_E,params_dict)
             if not(alreadyCalculated):
                 new+=1
@@ -94,8 +93,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
         df_E_list=[];file_path_list=[]
         for i in range(1,8):
             auto_csv_=os.path.join(auto_dir,f'step1_{i}.csv');df_E_ = pd.read_csv(auto_csv_)
-            for i in range(len(dict_matrix)):
-                params_dict=dict_matrix[i]
+            for params_dict in dict_matrix:
                 alreadyCalculated_ = check_calc_status(df_E_,params_dict)
                 if not(alreadyCalculated_):    
                     file_name = exec_gjf(auto_dir, monomer_name, {**params_dict}, structure_type=i)
@@ -158,8 +156,8 @@ def get_params_dict(auto_dir, num_nodes):
             df_init_params = update_value_in_df(df_init_params,index,'status','Done')
             df_init_params.to_csv(init_params_csv,index=False)
         else:
-            for i in range(len(opt_params_matrix)):
-                opt_params_dict={'cx':opt_params_matrix[i][0],'cy':opt_params_matrix[i][1],'cz':opt_params_matrix[i][2]}
+            for j in range(len(opt_params_matrix)):
+                opt_params_dict={'cx':opt_params_matrix[j][0],'cy':opt_params_matrix[j][1],'cz':opt_params_matrix[j][2]}
                 df_inprogress = filter_df(df_cur, {**fixed_params_dict,**opt_params_dict,'status':'InProgress'})
                 if len(df_inprogress)>=1:
                     continue

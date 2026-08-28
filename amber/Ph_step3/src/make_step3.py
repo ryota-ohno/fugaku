@@ -157,49 +157,49 @@ def make_gjf_xyz(auto_dir,monomer_name,params_dict,structure_type):
         monomer_array_i = get_monomer_xyzR(monomer_name,0,0,0,A2,A3,phi)
         dimer_array_i = np.concatenate([monomer_array_c,monomer_array_i])
         line_list_dimer_i = get_xyzR_lines(monomer_name,dimer_array_i)
-        gij_xyz_lines = line_list_dimer_i
+        amber_xyz_lines = line_list_dimer_i
 
     elif structure_type == 2:
         monomer_array_p1 = get_monomer_xyzR(monomer_name,a,0,0,A2,A3,phi)
         dimer_array_p1 = np.concatenate([monomer_array_c,monomer_array_p1])
         line_list_dimer_p1 = get_xyzR_lines(monomer_name,dimer_array_p1)
-        gij_xyz_lines = line_list_dimer_p1 
+        amber_xyz_lines = line_list_dimer_p1 
 
     elif structure_type == 3:
         monomer_array_p2 = get_monomer_xyzR(monomer_name,0,b,2*z,A2,A3,phi)
         dimer_array_p2 = np.concatenate([monomer_array_c,monomer_array_p2])
         line_list_dimer_p2 = get_xyzR_lines(monomer_name,dimer_array_p2)
-        gij_xyz_lines = line_list_dimer_p2 
+        amber_xyz_lines = line_list_dimer_p2 
 
     elif structure_type == 4:
         monomer_array_p3 = get_monomer_xyzR(monomer_name,-a,0,0,A2,A3,phi)
         dimer_array_p3 = np.concatenate([monomer_array_c,monomer_array_p3])
         line_list_dimer_p3 = get_xyzR_lines(monomer_name,dimer_array_p3)
-        gij_xyz_lines = line_list_dimer_p3
+        amber_xyz_lines = line_list_dimer_p3
 
     elif structure_type == 5:
         monomer_array_p4 = get_monomer_xyzR(monomer_name,0,-b,-2*z,A2,A3,phi)
         dimer_array_p4 = np.concatenate([monomer_array_c,monomer_array_p4])
         line_list_dimer_p4 = get_xyzR_lines(monomer_name,dimer_array_p4)
-        gij_xyz_lines = line_list_dimer_p4
+        amber_xyz_lines = line_list_dimer_p4
 
     elif structure_type == 6:
         monomer_array_t1 = get_monomer_xyzR(monomer_name,a/2,b/2,z,A2,-A3,-phi)
         dimer_array_t1 = np.concatenate([monomer_array_c,monomer_array_t1])
         line_list_dimer_t1 = get_xyzR_lines(monomer_name,dimer_array_t1)
-        gij_xyz_lines = line_list_dimer_t1
+        amber_xyz_lines = line_list_dimer_t1
 
     elif structure_type == 7:
         monomer_array_t2 = get_monomer_xyzR(monomer_name,-a/2,-b/2,-z,A2,-A3,-phi)##1,2がb方向
         dimer_array_t2 = np.concatenate([monomer_array_c,monomer_array_t2])
         line_list_dimer_t2 = get_xyzR_lines(monomer_name,dimer_array_t2)
-        gij_xyz_lines = line_list_dimer_t2 
+        amber_xyz_lines = line_list_dimer_t2 
     
     file_name = get_file_name_from_dict(monomer_name,params_dict,structure_type)
     os.makedirs(os.path.join(auto_dir,'amber'),exist_ok=True)
     gij_xyz_path = os.path.join(auto_dir,'amber',file_name)
     with open(gij_xyz_path,'w') as f:
-        f.writelines(gij_xyz_lines)
+        f.writelines(amber_xyz_lines)
     
     return file_name
 
