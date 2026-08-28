@@ -69,7 +69,7 @@ def listen(auto_dir,monomer_name,E_mono,num_nodes):##args自体を引数に取�
             auto_csv_=os.path.join(auto_dir,f'step1_{i}.csv');df_E_ = pd.read_csv(auto_csv_)
             s_= filter_df(df_E_, params_dict)[f'E{i}']
             if len(s_)>0:
-                E_list.append(s_.vlaues[0])
+                E_list.append(s_.values[0])
         if len(E_list)<7:
             continue
         E1,E2,E3,E4,E5,E6,E7=E_list
