@@ -14,10 +14,10 @@ def result_process(args):
     for phi in phi_list:
         dir_name = f'{phi}'
         path_dir=os.path.join(auto_dir,f'{dir_name}')
-        df=pd.read_csv(os.path.join(path_dir,'step3.csv'))
+        df=pd.read_csv(os.path.join(path_dir,'step1.csv'))
         df_tot.append(df)
     df_=pd.concat(df_tot, ignore_index=True)
-    df_.to_csv(os.path.join(auto_dir,'step3.csv'),index=False)
+    df_.to_csv(os.path.join(auto_dir,'step1.csv'),index=False)
     
 def update_value_in_df(df,index,key,value):
     df.loc[index,key]=value

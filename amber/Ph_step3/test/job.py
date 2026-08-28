@@ -9,13 +9,13 @@ import numpy as np
 def init_process(args):
     auto_dir = f'/vol0303/data/hp260444/Working/fugaku/amber/Ph_step3/{args.auto_dir}'
     monomer_name=args.monomer_name
-    df_init=pd.read_csv(os.path.join(auto_dir,'step3_init_params.csv'))
+    df_init=pd.read_csv(os.path.join(auto_dir,'step1_init_params.csv'))
     phi_list=[int(phi) for phi in np.linspace(0,170,18)]
     for phi in phi_list:
         dir_name = f'{phi}'
         os.makedirs(os.path.join(auto_dir,f'{dir_name}'), exist_ok=True)
         df_init_=df_init[df_init['phi']==phi]
-        df_init_.to_csv(os.path.join(auto_dir,f'{dir_name}/step3_init_params.csv'),index=False)
+        df_init_.to_csv(os.path.join(auto_dir,f'{dir_name}/step1_init_params.csv'),index=False)
         os.chdir(os.path.join(auto_dir,f'{dir_name}'))
         job_lines1=[
         '#!/bin/bash \n',
